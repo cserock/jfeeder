@@ -1,0 +1,10 @@
+var config = {
+    apiKey: "abcdefghijklmn",
+    authDomain: "abcde.firebaseapp.com",
+    databaseURL: "https://abcde.firebaseio.com",
+    projectId: "abcde",
+    storageBucket: "abcde.appspot.com",
+    messagingSenderId: "123456789"
+  };
+
+module.exports = config;
