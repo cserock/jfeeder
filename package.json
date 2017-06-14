@@ -1,0 +1,9 @@
+{
+  "name": "jfeeder",
+  "description": "server for jfeeder client",
+  "private": true,
+  "dependencies": {
+    "firebase": "^4.1.2",
+    "ws": "^3.0.0"
+  }
+}
