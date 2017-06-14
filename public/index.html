@@ -1,205 +1,219 @@
 <html>
+
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>J feeder - a meal feeder prototype for pet</title>
-    <script src="https://www.gstatic.com/firebasejs/3.6.2/firebase.js"></script>
-    <script src="assets/js/jquery.min.js"></script>
-    <script src="assets/js/jquery.easing.min.js"></script>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>J feeder - a meal feeder prototype for pet</title>
+  <script src="https://www.gstatic.com/firebasejs/3.6.2/firebase.js"></script>
+  <script src="assets/js/jquery.min.js"></script>
+  <script src="assets/js/jquery.easing.min.js"></script>
 
-    <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 
-    <!-- Optional theme -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+  <!-- Optional theme -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
 
-    <!-- Latest compiled and minified JavaScript -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-
-
-    <link rel="stylesheet" type="text/css" href="assets/css/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="assets/css/bootstrap-clockpicker.min.css">
-    <link rel="stylesheet" type="text/css" href="assets/css/github.min.css">
-    <link rel="stylesheet" type="text/css" href="assets/css/chart.css">
-    <script src="assets/js/jquery.easypiechart.min.js"></script>
-    <script src="assets/js/config.js"></script>
-
-    <script type="text/javascript">
-      var uid = "";
-      var name = "";
-      var email = "";
-
-      var initData = {'onMeal':0};
-      var returnData = {'err_cd':0,'data':[]};
-
-      var weight = 0;
-      var schedules = [];
-
-      var easypiechart = "";
-
-      // Initialize the default app
-      firebase.initializeApp(config);
-
-      var sid = "4OI5fC0CzgQc2P8GdoQ2OJVnHBz1";
-
-      const CMD_INIT = 1000;
-      const CMD_SET = 1001;
-      const CMD_GET = 1002;
-
-      const ERR_CD_SUCCESS = 0;
-      const ERR_CD_INVALIDATED_PARAM = 1;
-      const ERR_CD_DEFAULT = 10;
-
-      function cmdSet(data){
-        console.log("cmdSet");
-        console.log("sid : " + sid);
-        console.log("data : " + JSON.stringify(data));
-
-        firebase.database().ref(sid).update(data);
-      }
-
-      function addBatch(data){
-        console.log("addBatch");
-        console.log("sid : " + sid);
-        console.log("schedules : " + data.schedules);
-
-        //
-        var ref = firebase.database().ref('batches');
-        ref.orderByChild('sid').equalTo(sid).once("value", function(snapshot){
-
-          console.log("ok");
-          snapshot.forEach(function(data) {
-
-            var record = data.val();
-            // var key = Object.keys(record)[0];
-            // console.log(record["sid"]);
-            console.log(data.key);
-
-            if(record["sid"] == sid){
-              ref.child(data.key).remove();
-            }
-
-          });
+  <!-- Latest compiled and minified JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
 
-         var schedulesData = data.schedules;
-         for (var i in schedulesData) {
-           console.log("schedulesData : " + schedulesData[i] );
-           var batchData = {'sid':sid, 'schedule':schedulesData[i]};
-           console.log("data : " + JSON.stringify(batchData));
-           firebase.database().ref('batches').push(batchData);
-         }
+  <link rel="stylesheet" type="text/css" href="assets/css/bootstrap.min.css">
+  <link rel="stylesheet" type="text/css" href="assets/css/bootstrap-clockpicker.min.css">
+  <link rel="stylesheet" type="text/css" href="assets/css/github.min.css">
+  <link rel="stylesheet" type="text/css" href="assets/css/chart.css">
+  <script src="assets/js/jquery.easypiechart.min.js"></script>
+  <script src="assets/js/config.js"></script>
 
-        });
-      }
+  <script type="text/javascript">
+    var uid = "";
+    var name = "";
+    var email = "";
 
-      function setMeal(value){
-        var data = {'onMeal':value};
-        cmdSet(data);
-      }
+    var initData = {
+      'onMeal': 0
+    };
+    var returnData = {
+      'err_cd': 0,
+      'data': []
+    };
 
-      function updateSchedule(){
-        var data = {'schedules': schedules}
-        console.log("data : " + JSON.stringify(data));
-        cmdSet(data);
-        addBatch(data);
-      }
+    var weight = 0;
+    var schedules = [];
 
-      $(function(){
+    var easypiechart = "";
 
-        // chart
-        $('.chart').easyPieChart({
-    			easing: 'easeOutBounce',
-          size: 180,
-          lineWidth: 30,
-          barColor: '#638CCC',
-          lineCap: 'butt',
-    			onStep: function(from, to, percent) {
-    				$(this.el).find('.percent').text(Math.round(percent));
-    			}
-    		});
-    		easypiechart = window.easypiechart = $('.chart').data('easyPieChart');
+    // Initialize the default app
+    firebase.initializeApp(config);
 
-        $('#btnMealOn').click(function(){
-            setMeal(5);
-        });
-        $('#btnMealOff').click(function(){
-            setMeal(0);
-        });
+    var sid = "4OI5fC0CzgQc2P8GdoQ2OJVnHBz1";
 
-        $(document).on('click','.btnDeleteSchedule',function(){
+    const CMD_INIT = 1000;
+    const CMD_SET = 1001;
+    const CMD_GET = 1002;
 
-          var deleteItemIndex = $(this).data('index');
-          console.log(deleteItemIndex);
-          schedules.splice(deleteItemIndex, 1);
+    const ERR_CD_SUCCESS = 0;
+    const ERR_CD_INVALIDATED_PARAM = 1;
+    const ERR_CD_DEFAULT = 10;
 
-          updateSchedule();
-        });
+    function cmdSet(data) {
+      console.log("cmdSet");
+      console.log("sid : " + sid);
+      console.log("data : " + JSON.stringify(data));
 
+      firebase.database().ref(sid).update(data);
+    }
 
-        $('#btnAddSchedule').click(function(){
-            console.log("add schedule");
+    function addBatch(data) {
+      console.log("addBatch");
+      console.log("sid : " + sid);
+      console.log("schedules : " + data.schedules);
 
-            var scheduleTime = $('.clockpicker').find('input').val();
-            console.log(scheduleTime);
+      //
+      var ref = firebase.database().ref('batches');
+      ref.orderByChild('sid').equalTo(sid).once("value", function(snapshot) {
 
-            schedules.push(scheduleTime);
+        console.log("ok");
+        snapshot.forEach(function(data) {
 
-            var tmpSchedules = schedules.filter(function (el, i, arr) {
-              return arr.indexOf(el) === i;
-            });
+          var record = data.val();
+          // var key = Object.keys(record)[0];
+          // console.log(record["sid"]);
+          console.log(data.key);
 
-            schedules = tmpSchedules;
-            schedules.sort();
-
-            updateSchedule();
-        });
-
-
-
-
-      });
-
-
-      var ledRef = firebase.database().ref(sid);
-
-      ledRef.on('value', function(snapshot) {
-
-
-        if(snapshot.val()){
-          console.log("onMeal : " + snapshot.val().onMeal);
-          console.log("weight : " + snapshot.val().weight);
-
-          weight = snapshot.val().weight;
-
-          // $('#lblWeight').html(weight);
-          easypiechart.update(weight);
-
-          schedules = snapshot.val().schedules;
-
-          if(!$.isArray(schedules)) {
-            schedules = [];
+          if (record["sid"] == sid) {
+            ref.child(data.key).remove();
           }
 
-          schedules.sort();
-          console.log("schedules : " + schedules );
+        });
 
-          var scheduleListHtml = "";
 
-          for (var i in schedules) {
-            console.log("schedule : " + schedules[i] );
-            scheduleListHtml += "<li class=\"list-group-item flex-column align-items-start\"><div class=\"d-flex w-100 justify-content-between\"><span class=\"mb-1\"><b>" + schedules[i] + "</b></span>&nbsp;<button class=\"btnDeleteSchedule glyphicon glyphicon-remove\" aria-hidden=\"true\" data-index=\"" + i + "\" />" + "</div></li>";
-          }
-
-          $('#scheduleList').html(scheduleListHtml);
-
+        var schedulesData = data.schedules;
+        for (var i in schedulesData) {
+          console.log("schedulesData : " + schedulesData[i]);
+          var batchData = {
+            'sid': sid,
+            'schedule': schedulesData[i]
+          };
+          console.log("data : " + JSON.stringify(batchData));
+          firebase.database().ref('batches').push(batchData);
         }
 
       });
+    }
 
-    </script>
+    function setMeal(value) {
+      var data = {
+        'onMeal': value
+      };
+      cmdSet(data);
+    }
+
+    function updateSchedule() {
+      var data = {
+        'schedules': schedules
+      }
+      console.log("data : " + JSON.stringify(data));
+      cmdSet(data);
+      addBatch(data);
+    }
+
+    $(function() {
+
+      // chart
+      $('.chart').easyPieChart({
+        easing: 'easeOutBounce',
+        size: 180,
+        lineWidth: 30,
+        barColor: '#638CCC',
+        lineCap: 'butt',
+        onStep: function(from, to, percent) {
+          $(this.el).find('.percent').text(Math.round(percent));
+        }
+      });
+      easypiechart = window.easypiechart = $('.chart').data('easyPieChart');
+
+      $('#btnMealOn').click(function() {
+        setMeal(5);
+      });
+      $('#btnMealOff').click(function() {
+        setMeal(0);
+      });
+
+      $(document).on('click', '.btnDeleteSchedule', function() {
+
+        var deleteItemIndex = $(this).data('index');
+        console.log(deleteItemIndex);
+        schedules.splice(deleteItemIndex, 1);
+
+        updateSchedule();
+      });
+
+
+      $('#btnAddSchedule').click(function() {
+        console.log("add schedule");
+
+        var scheduleTime = $('.clockpicker').find('input').val();
+        console.log(scheduleTime);
+
+        schedules.push(scheduleTime);
+
+        var tmpSchedules = schedules.filter(function(el, i, arr) {
+          return arr.indexOf(el) === i;
+        });
+
+        schedules = tmpSchedules;
+        schedules.sort();
+
+        updateSchedule();
+      });
+
+
+
+
+    });
+
+
+    var ledRef = firebase.database().ref(sid);
+
+    ledRef.on('value', function(snapshot) {
+
+
+      if (snapshot.val()) {
+        console.log("onMeal : " + snapshot.val().onMeal);
+        console.log("weight : " + snapshot.val().weight);
+
+        weight = snapshot.val().weight;
+
+        // $('#lblWeight').html(weight);
+        easypiechart.update(weight);
+
+        schedules = snapshot.val().schedules;
+
+        if (!$.isArray(schedules)) {
+          schedules = [];
+        }
+
+        schedules.sort();
+        console.log("schedules : " + schedules);
+
+        var scheduleListHtml = "";
+
+        for (var i in schedules) {
+          console.log("schedule : " + schedules[i]);
+          scheduleListHtml += "<li class=\"list-group-item flex-column align-items-start\"><div class=\"d-flex w-100 justify-content-between\"><span class=\"mb-1\"><b>" + schedules[i] +
+            "</b></span>&nbsp;<button class=\"btnDeleteSchedule glyphicon glyphicon-remove\" aria-hidden=\"true\" data-index=\"" + i + "\" />" + "</div></li>";
+        }
+
+        $('#scheduleList').html(scheduleListHtml);
+
+      }
+
+    });
+  </script>
 </head>
+
 <body>
 
   <!-- Fixed navbar -->
@@ -218,136 +232,140 @@
         <ul class="nav navbar-nav">
           <li class="active"><a href="./index.html">Home</a></li>
         </ul>
-      </div><!--/.nav-collapse -->
+      </div>
+      <!--/.nav-collapse -->
     </div>
   </nav>
 
   <div class="container theme-showcase" role="main">
 
-      <!-- Main jumbotron for a primary marketing message or call to action -->
-      <div class="page-header" align="center">
-        <span class="chart" data-percent="75">
+    <!-- Main jumbotron for a primary marketing message or call to action -->
+    <div class="page-header" align="center">
+      <span class="chart" data-percent="75">
         <span id="lblWeight" class="percent"></span>
-        </span>
-        <br />
-        <br />
-        <br />
-        <p>
-            <button type="button" id="btnMealOn" class="btn btn-block btn-success">Feeding Now</button>
-        </p>
-      </div>
+      </span>
+      <br />
+      <br />
+      <br />
+      <p>
+        <button type="button" id="btnMealOn" class="btn btn-block btn-success">Feeding Now</button>
+      </p>
+    </div>
 
-      <div class="page-header">
-        <h3>Schedule</h3>
-        <ul id="scheduleList" class="list-group"></ul>
-        <div class="form-group">
-      		<div class="input-group clockpicker">
-      			<input type="text" class="form-control" value="">
-      			<span class="input-group-addon">
+    <div class="page-header">
+      <h3>Schedule</h3>
+      <ul id="scheduleList" class="list-group"></ul>
+      <div class="form-group">
+        <div class="input-group clockpicker">
+          <input type="text" class="form-control" value="">
+          <span class="input-group-addon">
       				<span class="glyphicon glyphicon-time"></span>
-            </span>
-      		</div>
-          <button type="button" id="btnAddSchedule" class="btn btn-block btn-success">Add</button>
+          </span>
         </div>
+        <button type="button" id="btnAddSchedule" class="btn btn-block btn-success">Add</button>
       </div>
-    </div> <!-- /container -->
+    </div>
+  </div>
+  <!-- /container -->
 
 
-    <footer class="footer">
-      <div class="container">
-        <p class="text-muted">©2017 cserock@gmail.com ALL RIGHTS RESERVED</p>
-      </div>
-    </footer>
+  <footer class="footer">
+    <div class="container">
+      <p class="text-muted">©2017 cserock@gmail.com ALL RIGHTS RESERVED</p>
+    </div>
+  </footer>
 
   <script type="text/javascript" src="assets/js/bootstrap-clockpicker.min.js"></script>
   <script type="text/javascript">
-
-  function pad(n, width) {
-    n = n + '';
-    return n.length >= width ? n : new Array(width - n.length + 1).join('0') + n;
-  }
-
-  var now = new Date();
-  var originMinutes = now.getMinutes();
-  var minutes = (Math.ceil(originMinutes/10) * 10 % 60);
-  minutes = pad(minutes, 2);
-  var nowTime = now.getHours() + ":" + minutes;
-
-  console.log(nowTime);
-
-  $('.clockpicker').clockpicker({
-  	donetext: 'Done',
-    'default':'now',
-    init: function() {
-      $('.clockpicker').find('input').val(nowTime);
+    function pad(n, width) {
+      n = n + '';
+      return n.length >= width ? n : new Array(width - n.length + 1).join('0') + n;
     }
-  }).find('input').change(function(){
-    console.log(this.value);
-  });
-  //
-  // $('.clockpicker').clockpicker()
-  // 	.find('input').change(function(){
-  // 		console.log(this.value);
-  // 	});
-  var input = $('#single-input').clockpicker({
-  	placement: 'bottom',
-  	align: 'left',
-  	autoclose: true,
-  	'default': 'now'
-  });
 
-  $('.clockpicker-with-callbacks').clockpicker({
-  		donetext: 'Done',
-  		init: function() {
-  			console.log("colorpicker initiated");
-  		},
-  		beforeShow: function() {
-  			console.log("before show");
-  		},
-  		afterShow: function() {
-  			console.log("after show");
-  		},
-  		beforeHide: function() {
-  			console.log("before hide");
-  		},
-  		afterHide: function() {
-  			console.log("after hide");
-  		},
-  		beforeHourSelect: function() {
-  			console.log("before hour selected");
-  		},
-  		afterHourSelect: function() {
-  			console.log("after hour selected");
-  		},
-  		beforeDone: function() {
-  			console.log("before done");
-  		},
-  		afterDone: function() {
-  			console.log("after done");
-  		}
-  	})
-  	.find('input').change(function(){
-  		console.log(this.value);
-  	});
+    var now = new Date();
+    var originMinutes = now.getMinutes();
+    var minutes = (Math.ceil(originMinutes / 10) * 10 % 60);
+    minutes = pad(minutes, 2);
+    var nowTime = now.getHours() + ":" + minutes;
 
-  // Manually toggle to the minutes view
-  $('#check-minutes').click(function(e){
-  	// Have to stop propagation here
-  	e.stopPropagation();
-  	input.clockpicker('show')
-  			.clockpicker('toggleView', 'minutes');
-  });
-  if (/mobile/i.test(navigator.userAgent)) {
-  	$('input').prop('readOnly', true);
-  }
+    console.log(nowTime);
+
+    $('.clockpicker').clockpicker({
+      donetext: 'Done',
+      'default': 'now',
+      init: function() {
+        $('.clockpicker').find('input').val(nowTime);
+      }
+    }).find('input').change(function() {
+      console.log(this.value);
+    });
+    //
+    // $('.clockpicker').clockpicker()
+    // 	.find('input').change(function(){
+    // 		console.log(this.value);
+    // 	});
+    var input = $('#single-input').clockpicker({
+      placement: 'bottom',
+      align: 'left',
+      autoclose: true,
+      'default': 'now'
+    });
+
+    $('.clockpicker-with-callbacks').clockpicker({
+        donetext: 'Done',
+        init: function() {
+          console.log("colorpicker initiated");
+        },
+        beforeShow: function() {
+          console.log("before show");
+        },
+        afterShow: function() {
+          console.log("after show");
+        },
+        beforeHide: function() {
+          console.log("before hide");
+        },
+        afterHide: function() {
+          console.log("after hide");
+        },
+        beforeHourSelect: function() {
+          console.log("before hour selected");
+        },
+        afterHourSelect: function() {
+          console.log("after hour selected");
+        },
+        beforeDone: function() {
+          console.log("before done");
+        },
+        afterDone: function() {
+          console.log("after done");
+        }
+      })
+      .find('input').change(function() {
+        console.log(this.value);
+      });
+
+    // Manually toggle to the minutes view
+    $('#check-minutes').click(function(e) {
+      // Have to stop propagation here
+      e.stopPropagation();
+      input.clockpicker('show')
+        .clockpicker('toggleView', 'minutes');
+    });
+    if (/mobile/i.test(navigator.userAgent)) {
+      $('input').prop('readOnly', true);
+    }
   </script>
   <script type="text/javascript" src="assets/js/highlight.min.js"></script>
   <script type="text/javascript">
-  hljs.configure({tabReplace: '    '});
-  hljs.initHighlightingOnLoad();
+    hljs.configure({
+      tabReplace: '    '
+    });
+    hljs.initHighlightingOnLoad();
   </script>
 
 
 
 </body>
+
 </html>
